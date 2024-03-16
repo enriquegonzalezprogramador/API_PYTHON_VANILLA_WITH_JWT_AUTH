@@ -1,22 +1,23 @@
 class User:
-    def __init__(self, id, name, edad, sexo, pais):
+    def __init__(self, id, username, edad, sexo, pais, password):
         self._id = id
-        self._name = name
+        self._username = username
         self._edad = edad
         self._sexo = sexo
         self._pais = pais
+        self._password = password
 
     @property
     def id(self):
         return self._id
 
     @property
-    def name(self):
-        return self._name
+    def username(self):
+        return self._username
 
-    @name.setter
-    def name(self, value):
-        self._name = value
+    @username.setter
+    def username(self, value):
+        self._username = value
 
     @property
     def edad(self):
@@ -42,11 +43,20 @@ class User:
     def pais(self, value):
         self._pais = value
 
+    @property
+    def password(self):
+        return self._password
+
+    @password.setter
+    def password(self, value):
+        self._password = value
+
     def to_dict(self):
         return {
             'id': self.id,
-            'name': self.name,
+            'username': self.username,
             'edad': self.edad,
             'sexo': self.sexo,
-            'pais': self.pais
+            'pais': self.pais,
+            'password': self.password
         }

@@ -14,7 +14,7 @@ class UserRepositoryImpl(UserRepository):
             users = cursor.fetchall()
 
             # Convertir los resultados en formato JSON sin escapar
-            json_users = json.dumps([dict(zip(['id', 'name', 'edad', 'sexo', 'pais'], user)) for user in users], ensure_ascii=False)
+            json_users = json.dumps([dict(zip(['id', 'username', 'edad', 'sexo', 'pais'], user)) for user in users], ensure_ascii=False)
             
             print(json_users)  # Imprime la cadena JSON en la consola de Python
             
@@ -37,7 +37,7 @@ class UserRepositoryImpl(UserRepository):
             # Verificar si se encontró un usuario con el ID especificado
             if user:
                 # Convertir el resultado en un diccionario
-                user_dict = dict(zip(['id', 'name', 'edad', 'sexo', 'pais'], user))
+                user_dict = dict(zip(['id', 'username', 'edad', 'sexo', 'pais'], user))
                 # Convertir el diccionario en formato JSON sin escapar
                 json_user = json.dumps(user_dict, ensure_ascii=False)
                 return json_user
@@ -57,8 +57,8 @@ class UserRepositoryImpl(UserRepository):
             cursor = connection.cursor()
 
             # Insertar los datos del usuario en la base de datos
-            query = "INSERT INTO users (name, edad, sexo, pais) VALUES (%s, %s, %s, %s) RETURNING id"
-            cursor.execute(query, (user_data['name'], user_data['edad'], user_data['sexo'], user_data['pais']))
+            query = "INSERT INTO users (username, edad, sexo, pais, password) VALUES (%s, %s, %s, %s, %s) RETURNING id"
+            cursor.execute(query, (user_data['username'], user_data['edad'], user_data['sexo'], user_data['pais'], user_data['password']))
             new_user_id = cursor.fetchone()[0]
             connection.commit()
 
@@ -77,8 +77,8 @@ class UserRepositoryImpl(UserRepository):
             cursor = connection.cursor()
 
             # Actualizar los datos del usuario en la base de datos
-            query = "UPDATE users SET name = %s, edad = %s, sexo = %s, pais = %s WHERE id = %s"
-            cursor.execute(query, (user_data['name'], user_data['edad'], user_data['sexo'], user_data['pais'], user_id))
+            query = "UPDATE users SET username = %s, edad = %s, sexo = %s, pais = %s, password = %s WHERE id = %s"
+            cursor.execute(query, (user_data['username'], user_data['edad'], user_data['sexo'], user_data['pais'], user_data['password'], user_id))
             connection.commit()
 
             print("Usuario actualizado correctamente")
@@ -106,6 +106,31 @@ class UserRepositoryImpl(UserRepository):
             # Manejo de errores en caso de problemas con la base de datos
             print(f"Error al eliminar el usuario con ID {user_id}:", e)
             return False
+        finally:
+            connection.close()
+
+    def get_user_by_username(self, username):
+        try:
+            connection = Database().db_session()
+            cursor = connection.cursor()
+            query = "SELECT * FROM users WHERE username = %s"
+            cursor.execute(query, (username,))
+            user = cursor.fetchone()
+
+            # Verificar si se encontró un usuario con el ID especificado
+            if user:
+                # Convertir el resultado en un diccionario
+                user_dict = dict(zip(['id', 'username', 'edad', 'sexo', 'pais', 'password'], user))
+                # Convertir el diccionario en formato JSON sin escapar
+                json_user = json.dumps(user_dict, ensure_ascii=False)
+                return json_user
+            else:
+                print("No se encontró ningún usuario con el Username especificado:", username)
+                return None
+        except psycopg2.Error as e:
+            # Manejo de errores en caso de problemas con la base de datos
+            print(f"Error al obtener el usuario con ID {username}:", e)
+            return None
         finally:
             connection.close()
 

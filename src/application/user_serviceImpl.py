@@ -20,5 +20,9 @@ class UserServiceImpl(UserService):
 
     def delete_user(self, user_id):
         return self.user_repository.delete(user_id)
+    
+    def get_user_by_username(self, username):
+        return self.user_repository.get_user_by_username(username)
+
 
 
