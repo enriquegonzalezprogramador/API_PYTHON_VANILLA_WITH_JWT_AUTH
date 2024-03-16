@@ -77,10 +77,10 @@ class MyServer(BaseHTTPRequestHandler):
 
         elif self.path == '/login':
             data = self._parse_request_data()
-            username = data.get('username')
+            email = data.get('email')
             password = data.get('password')
 
-            userResp = UserServiceImpl().get_user_by_username(username)
+            userResp = UserServiceImpl().get_user_by_email(email)
             user = json.loads(userResp)
 
             print(userResp)
@@ -88,15 +88,17 @@ class MyServer(BaseHTTPRequestHandler):
 
             if user:
                 if verify_password(password, user['password']):
-                    token = generate_token({'username': username})
+                    token = generate_token({'email': email})
+                    user['password'] = ""
+                    user['token'] = token  # Agregar el token al objeto de usuario
                     self._set_headers()
-                    self.wfile.write(json.dumps({'token': token}).encode())
+                    self.wfile.write(json.dumps(user).encode())
                 else:
                     self._set_headers(status_code=401)
-                    self.wfile.write(json.dumps({'message': 'Invalid username or password'}).encode())
+                    self.wfile.write(json.dumps({'message': 'Invalid email or password'}).encode())
             else:
                 self._set_headers(status_code=401)
-                self.wfile.write(json.dumps({'message': 'Invalid username or password'}).encode())
+                self.wfile.write(json.dumps({'message': 'Invalid email or password'}).encode())
 
     def do_PUT(self):
         if self.path.startswith('/users/'):
